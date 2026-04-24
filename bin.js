@@ -20,10 +20,12 @@ const banCmd = command(
     const ip = cmd.args.ip
     const storage = path.resolve(cmd.flags.storage || DEFAULT_STORAGE)
     const store = new Corestore(storage)
-    goodbye(() => store.close())
-
     const banList = new IpBanList(store)
-    goodbye(() => banList.close())
+
+    goodbye(async () => {
+      await banList.close()
+      await store.close()
+    })
 
     await banList.ban(ip)
     console.log(`Banned ${ip}`)
@@ -41,10 +43,12 @@ const unbanCmd = command(
     const ip = cmd.args.ip
     const storage = path.resolve(cmd.flags.storage || DEFAULT_STORAGE)
     const store = new Corestore(storage)
-    goodbye(() => store.close())
-
     const banList = new IpBanList(store)
-    goodbye(() => banList.close())
+
+    goodbye(async () => {
+      await banList.close()
+      await store.close()
+    })
 
     await banList.unban(ip)
     console.log(`Unbanned ${ip}`)
@@ -60,10 +64,12 @@ const idCmd = command(
   async (cmd) => {
     const storage = path.resolve(cmd.flags.storage || DEFAULT_STORAGE)
     const store = new Corestore(storage)
-    goodbye(() => store.close())
-
     const banList = new IpBanList(store)
-    goodbye(() => banList.close())
+
+    goodbye(async () => {
+      await banList.close()
+      await store.close()
+    })
 
     await banList.ready()
 
@@ -85,6 +91,11 @@ const seedCmd = command(
       : null
     const store = new Corestore(storage)
     const banList = new IpBanList(store)
+
+    goodbye(async () => {
+      await banList.close()
+      await store.close()
+    })
 
     await banList.ready()
 
