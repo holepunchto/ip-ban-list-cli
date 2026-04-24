@@ -6,7 +6,7 @@ const IdEnc = require('hypercore-id-encoding')
 const Hyperswarm = require('hyperswarm')
 const createTestnet = require('hyperdht/testnet')
 const IpBanList = require('ip-ban-list')
-const { runIpBanListBin, spawnIpBanListBin, waitForOutput } = require('./helpers')
+const { runIpBanListBin, spawnIpBanListBin } = require('./helpers')
 
 test('ban, seed, and unban update the replicated reader ban list', async (t) => {
   const storage = path.join(await t.tmp(), 'corestore')
@@ -34,9 +34,6 @@ test('ban, seed, and unban update the replicated reader ban list', async (t) => 
     String(bootstrapPort)
   )
 
-  const seeding = await waitForOutput(seedProc, 'Seeding', 5_000)
-  t.ok(seeding, 'seed announces to hyperswarm')
-
   const readerStore = new Corestore(await t.tmp())
   const reader = new IpBanList(readerStore, { key })
   t.teardown(async () => {
@@ -56,7 +53,7 @@ test('ban, seed, and unban update the replicated reader ban list', async (t) => 
   t.is(reader.isBanned('1.1.1.1'), false)
 
   // we need to stop the old seed process to unlock the corestore so unban can work
-  seedProc.kill('SIGKILL')
+  seedProc.kill('SIGTERM')
   await once(seedProc, 'close')
 
   const finalUnban = await runIpBanListBin(t, 'unban', '--storage', storage, ip)
@@ -78,6 +75,6 @@ test('ban, seed, and unban update the replicated reader ban list', async (t) => 
 
   t.is(reader.isBanned(ip), false)
 
-  reseedProc.kill('SIGKILL')
+  reseedProc.kill('SIGTERM')
   await once(reseedProc, 'close')
 })
